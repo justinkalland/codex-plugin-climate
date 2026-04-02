@@ -1,0 +1,40 @@
+{
+  "name": "climate",
+  "version": "0.1.0",
+  "description": "Take climate action from Codex by purchasing tree planting, carbon avoidance, and carbon removal through supported providers while maintaining managed repo climate docs.",
+  "author": {
+    "name": "Justin Kalland",
+    "email": "justin@kalland.com",
+    "url": "https://github.com/justinkalland"
+  },
+  "homepage": "https://need_github_link",
+  "license": "MIT",
+  "keywords": [
+    "climate",
+    "carbon",
+    "ecologi",
+    "sustainability"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Climate",
+    "shortDescription": "Climate action through Codex",
+    "longDescription": "Use Climate to take climate action by purchasing tree planting, carbon avoidance, and carbon removal through supported providers while maintaining managed repo climate docs.",
+    "developerName": "Justin Kalland",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Plant ten trees.",
+      "Remove 10 KG of carbon.",
+      "Fund the avoidance of 50 KG of carbon.",
+      "Initialize Climate tracking in this repo and create CLIMATE.md."
+    ],
+    "brandColor": "#247D45",
+    "composerIcon": "./assets/climate-small.svg",
+    "logo": "./assets/climate.svg",
+    "screenshots": []
+  }
+}

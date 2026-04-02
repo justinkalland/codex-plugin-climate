@@ -1,0 +1,20 @@
+{
+  "name": "local-dev",
+  "interface": {
+    "displayName": "Local Workspace Plugins"
+  },
+  "plugins": [
+    {
+      "name": "climate",
+      "source": {
+        "source": "local",
+        "path": "./plugins/climate"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
