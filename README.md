@@ -40,7 +40,7 @@ This repo is set up for the repo-local installation flow described in the [offic
 1. Clone this repo:
 
 ```bash
-git clone <your-fork-or-this-repo-url>
+git clone https://github.com/justinkalland/codex-plugin-climate
 cd codex-plugin-climate
 ```
 
