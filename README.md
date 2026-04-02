@@ -111,9 +111,3 @@ Climate currently requires Python 3.10 or newer.
 - Local trees and habitat restoration are not wired up yet.
 - Repo emissions estimation is intentionally stubbed and does not calculate anything yet.
 - Networked purchase flows may still require Codex approval depending on your sandbox and permissions settings.
-
-<!-- climate:readme:start -->
-## Climate Action
-This project tracks climate actions taken through the Climate plugin.
-See [CLIMATE.md](CLIMATE.md) for totals and the live impact log.
-<!-- climate:readme:end -->
