@@ -44,7 +44,7 @@ git clone https://github.com/justinkalland/codex-plugin-climate
 cd codex-plugin-climate
 ```
 
-2. Open the repo as a workspace in Codex.
+2. Open this repo in Codex.
 
 3. In the Codex app, open Plugins.
 
