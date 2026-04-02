@@ -104,3 +104,9 @@ For workspace-local install, testing, and development notes, see [CONTRIBUTING.m
 - Local trees and habitat restoration are not wired up yet.
 - Repo emissions estimation is intentionally stubbed and does not calculate anything yet.
 - Networked purchase flows may still require Codex approval depending on your sandbox and permissions settings.
+
+## Disclaimer
+
+This is a personal project by Justin Kalland. It is not affiliated with, endorsed by, or sponsored by OpenAI or Codex.
+
+This software is provided as-is, without warranty of any kind, and the authors assume no liability for damages, losses, or other claims arising from its use.
