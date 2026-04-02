@@ -30,12 +30,8 @@ Calls stay non-live unless you explicitly confirm a live action. Confirmed live 
 
 ## Install In Codex
 
-This repo is set up for the repo-local installation flow described in the [official Codex plugin docs](https://developers.openai.com/codex/plugins):
-
-### Requirments
-- For this MVP, Python is required
-
-### Repo-local install
+### Requirements
+- For this MVP, Python 3.10 or newer is required
 
 1. Clone this repo:
 
@@ -44,13 +40,25 @@ git clone https://github.com/justinkalland/codex-plugin-climate
 cd codex-plugin-climate
 ```
 
-2. Open this repo in Codex.
+2. Run the installer:
 
-3. In the Codex app, open Plugins.
+```bash
+sh scripts/install-climate-plugin
+```
 
-4. Choose the `Local Workspace Plugins` marketplace.
+On Windows:
+
+```bat
+scripts\install-climate-plugin.cmd
+```
+
+3. In Codex, open Plugins.
+
+4. Choose the `Local Plugins` marketplace.
 
 5. Install `Climate`.
+
+If you move this repo later, run the installer again so the marketplace entry points at the new location.
 
 ## Use In Codex
 
@@ -86,24 +94,7 @@ Managed `CLIMATE.md` files include:
 
 ## Local Development
 
-Run the test suite with:
-
-```bash
-python -m unittest discover -s tests -v
-```
-
-Useful helper commands:
-
-```bash
-sh plugins/climate/scripts/climate estimate --repo-root .
-sh plugins/climate/scripts/climate init-repo --repo-root .
-sh plugins/climate/scripts/climate purchase --action plant-tree --quantity 1
-sh plugins/climate/scripts/climate configure-ecologi --api-key SIMULATE
-```
-
-Use `SIMULATE` as the configured Ecologi credential during local development when you want normal plugin behavior without making any network calls.
-The launcher tries `python3` and then `python` on macOS/Linux/WSL. On Windows native, use `plugins\climate\scripts\climate.cmd`, which tries `py -3`, `python3`, and then `python`.
-Climate currently requires Python 3.10 or newer.
+For workspace-local install, testing, and development notes, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Current Limitations
 
