@@ -4,6 +4,7 @@ Take climate action from Codex. This plugin lets you make climate purchases thro
 
 V1 (MVP) supports:
 
+- Ecologi as the first provider
 - tree planting
 - carbon avoidance
 - carbon removal
@@ -12,6 +13,7 @@ V1 (MVP) supports:
 
 V2 plans:
 
+- more providers
 - Machine Payments Protocol (MPP) instead of needing a provider account and API key
 - carbon output estimations for repos or actions
 
