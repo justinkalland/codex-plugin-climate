@@ -58,7 +58,7 @@ scripts\install-climate-plugin.cmd
 
 5. Install `Climate`.
 
-If you move this repo later, run the installer again so the marketplace entry points at the new location.
+The installer stages the plugin into your user Codex directory and wires the user-level marketplace for you. Run it again after pulling updates if you want to refresh the installed source copy.
 
 ## Use In Codex
 

@@ -44,6 +44,7 @@ scripts\install-climate-plugin.cmd
 ```
 
 That writes or updates `~/.agents/plugins/marketplace.json` so Codex can discover this plugin outside the repo too.
+It also refreshes a managed plugin source copy under `~/.codex/plugins/local-source/climate`.
 
 ## Tests
 

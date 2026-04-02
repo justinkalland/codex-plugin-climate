@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 from copy import deepcopy
 from dataclasses import dataclass
@@ -23,7 +24,8 @@ class InstallResult:
     marketplace_path: Path
     marketplace_name: str
     marketplace_display_name: str
-    plugin_path: Path
+    source_plugin_path: Path
+    installed_source_path: Path
     created_marketplace: bool
     changed: bool
 
@@ -88,11 +90,27 @@ def _load_marketplace_document(marketplace_path: Path) -> tuple[dict[str, Any], 
     return _ensure_marketplace_document_shape(document, marketplace_path), False
 
 
+def _relative_plugin_source_path(
+    managed_plugin_path: Path, marketplace_path: Path
+) -> str:
+    marketplace_root = marketplace_path.expanduser().parent.parent.parent.resolve()
+    managed_plugin_path = managed_plugin_path.resolve()
+
+    try:
+        relative_path = managed_plugin_path.relative_to(marketplace_root)
+    except ValueError as exc:
+        raise ValueError(
+            f"{managed_plugin_path} must live inside {marketplace_root} so Codex can load it "
+            "from the user-level marketplace."
+        ) from exc
+
+    return f"./{relative_path.as_posix()}"
+
+
 def _upsert_climate_plugin_entry(
-    document: dict[str, Any], plugin_path: Path
+    document: dict[str, Any], source_path_value: str
 ) -> tuple[dict[str, Any], bool]:
     plugins = document["plugins"]
-    plugin_path_str = str(plugin_path)
     plugin_index = next(
         (index for index, plugin in enumerate(plugins) if plugin.get("name") == PLUGIN_NAME),
         None,
@@ -112,7 +130,7 @@ def _upsert_climate_plugin_entry(
     if not isinstance(source, dict):
         source = {}
     source["source"] = "local"
-    source["path"] = plugin_path_str
+    source["path"] = source_path_value
     entry["source"] = source
 
     policy = entry.get("policy")
@@ -127,16 +145,35 @@ def _upsert_climate_plugin_entry(
     return document, before != entry
 
 
-def install_plugin(plugin_path: Path, marketplace_path: Path) -> InstallResult:
+def _install_managed_plugin_copy(source_plugin_path: Path, managed_plugin_path: Path) -> bool:
+    source_plugin_path = source_plugin_path.resolve()
+    managed_plugin_path = managed_plugin_path.expanduser().resolve()
+
+    if managed_plugin_path.exists() and managed_plugin_path.is_symlink():
+        managed_plugin_path.unlink()
+    elif managed_plugin_path.exists():
+        shutil.rmtree(managed_plugin_path)
+
+    managed_plugin_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(source_plugin_path, managed_plugin_path)
+    return True
+
+
+def install_plugin(
+    plugin_path: Path, marketplace_path: Path, managed_plugin_path: Path
+) -> InstallResult:
     plugin_path = plugin_path.expanduser().resolve()
     marketplace_path = marketplace_path.expanduser()
+    managed_plugin_path = managed_plugin_path.expanduser()
 
     manifest_path = plugin_path / ".codex-plugin" / "plugin.json"
     if not manifest_path.is_file():
         raise FileNotFoundError(f"Could not find Climate plugin manifest at {manifest_path}")
 
+    changed = _install_managed_plugin_copy(plugin_path, managed_plugin_path)
+    source_path_value = _relative_plugin_source_path(managed_plugin_path, marketplace_path)
     document, created_marketplace = _load_marketplace_document(marketplace_path)
-    document, changed = _upsert_climate_plugin_entry(document, plugin_path)
+    document, marketplace_changed = _upsert_climate_plugin_entry(document, source_path_value)
 
     marketplace_path.parent.mkdir(parents=True, exist_ok=True)
     marketplace_path.write_text(json.dumps(document, indent=2) + "\n")
@@ -145,9 +182,10 @@ def install_plugin(plugin_path: Path, marketplace_path: Path) -> InstallResult:
         marketplace_path=marketplace_path,
         marketplace_name=document["name"],
         marketplace_display_name=document["interface"]["displayName"],
-        plugin_path=plugin_path,
+        source_plugin_path=plugin_path,
+        installed_source_path=managed_plugin_path.resolve(),
         created_marketplace=created_marketplace,
-        changed=changed or created_marketplace,
+        changed=changed or marketplace_changed or created_marketplace,
     )
 
 
@@ -173,6 +211,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=Path.home() / ".agents" / "plugins" / "marketplace.json",
         help="Path to the user-level Codex marketplace JSON file.",
     )
+    parser.add_argument(
+        "--managed-plugin-path",
+        type=Path,
+        default=Path.home() / ".codex" / "plugins" / "local-source" / "climate",
+        help=(
+            "Managed plugin source location inside the user home directory. "
+            "Codex loads the user-level marketplace from relative paths under the home root."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -187,7 +234,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
 
     try:
-        result = install_plugin(args.plugin_path, args.marketplace_path)
+        result = install_plugin(
+            args.plugin_path,
+            args.marketplace_path,
+            args.managed_plugin_path,
+        )
     except (FileNotFoundError, ValueError) as exc:
         sys.stderr.write(f"{exc}\n")
         return 1
@@ -201,7 +252,8 @@ def main(argv: list[str] | None = None) -> int:
     sys.stdout.write(
         f"{status} {result.marketplace_path} for the Climate plugin.\n"
         f"Marketplace: {result.marketplace_display_name} ({result.marketplace_name})\n"
-        f"Plugin path: {result.plugin_path}\n\n"
+        f"Installed source: {result.installed_source_path}\n"
+        f"From repo path: {result.source_plugin_path}\n\n"
         "Next:\n"
         "1. Open Codex.\n"
         "2. Open Plugins.\n"

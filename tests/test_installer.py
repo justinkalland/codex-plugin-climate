@@ -27,8 +27,9 @@ class InstallerTests(unittest.TestCase):
             root = Path(temp_dir)
             plugin_path = self._create_plugin_fixture(root)
             marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+            managed_plugin_path = root / ".codex" / "plugins" / "local-source" / "climate"
 
-            result = install_plugin(plugin_path, marketplace_path)
+            result = install_plugin(plugin_path, marketplace_path, managed_plugin_path)
 
             self.assertTrue(result.created_marketplace)
             document = json.loads(marketplace_path.read_text())
@@ -37,14 +38,17 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual(document["plugins"][0]["name"], "climate")
             self.assertEqual(
                 document["plugins"][0]["source"]["path"],
-                str(plugin_path.resolve()),
+                "./.codex/plugins/local-source/climate",
             )
+            self.assertEqual(result.installed_source_path, managed_plugin_path.resolve())
+            self.assertTrue((managed_plugin_path / ".codex-plugin" / "plugin.json").is_file())
 
     def test_install_preserves_existing_marketplace_and_other_plugins(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             plugin_path = self._create_plugin_fixture(root)
             marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+            managed_plugin_path = root / ".codex" / "plugins" / "local-source" / "climate"
             marketplace_path.parent.mkdir(parents=True)
             marketplace_path.write_text(
                 json.dumps(
@@ -63,7 +67,7 @@ class InstallerTests(unittest.TestCase):
                 + "\n"
             )
 
-            result = install_plugin(plugin_path, marketplace_path)
+            result = install_plugin(plugin_path, marketplace_path, managed_plugin_path)
 
             self.assertFalse(result.created_marketplace)
             document = json.loads(marketplace_path.read_text())
@@ -72,12 +76,17 @@ class InstallerTests(unittest.TestCase):
             self.assertEqual(len(document["plugins"]), 2)
             self.assertEqual(document["plugins"][0]["name"], "existing-plugin")
             self.assertEqual(document["plugins"][1]["name"], "climate")
+            self.assertEqual(
+                document["plugins"][1]["source"]["path"],
+                "./.codex/plugins/local-source/climate",
+            )
 
     def test_install_updates_existing_climate_entry(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
             plugin_path = self._create_plugin_fixture(root)
             marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+            managed_plugin_path = root / ".codex" / "plugins" / "local-source" / "climate"
             marketplace_path.parent.mkdir(parents=True)
             marketplace_path.write_text(
                 json.dumps(
@@ -101,13 +110,13 @@ class InstallerTests(unittest.TestCase):
                 + "\n"
             )
 
-            install_plugin(plugin_path, marketplace_path)
+            install_plugin(plugin_path, marketplace_path, managed_plugin_path)
 
             document = json.loads(marketplace_path.read_text())
             self.assertEqual(len(document["plugins"]), 1)
             self.assertEqual(
                 document["plugins"][0]["source"]["path"],
-                str(plugin_path.resolve()),
+                "./.codex/plugins/local-source/climate",
             )
             self.assertEqual(document["plugins"][0]["category"], "Productivity")
 
@@ -116,11 +125,12 @@ class InstallerTests(unittest.TestCase):
             root = Path(temp_dir)
             plugin_path = self._create_plugin_fixture(root)
             marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
+            managed_plugin_path = root / ".codex" / "plugins" / "local-source" / "climate"
             marketplace_path.parent.mkdir(parents=True)
             marketplace_path.write_text('{"name":"broken","plugins":{}}\n')
 
             with self.assertRaises(ValueError):
-                install_plugin(plugin_path, marketplace_path)
+                install_plugin(plugin_path, marketplace_path, managed_plugin_path)
 
 
 if __name__ == "__main__":
