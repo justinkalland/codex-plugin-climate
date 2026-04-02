@@ -25,6 +25,10 @@ from climate_plugin.providers import (
 from climate_plugin.repo_docs import sync_repo_files
 
 
+ECOLOGI_SIGNUP_URL = "https://ecologi.com/pay-as-you-go"
+ECOLOGI_API_KEY_URL = "https://ecologi.com/impact-api"
+
+
 def _read_api_key(args: argparse.Namespace) -> str:
     if getattr(args, "api_key", None):
         return args.api_key
@@ -36,6 +40,21 @@ def _read_api_key(args: argparse.Namespace) -> str:
 def _print_json(payload: dict[str, Any]) -> int:
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
+
+
+def _setup_required_payload(*, config_path: Path) -> dict[str, Any]:
+    return {
+        "status": "setup-required",
+        "setupRequired": True,
+        "provider": "ecologi",
+        "errorCode": "missing-credential",
+        "message": "Ecologi is not configured yet.",
+        "nextStep": "Paste your Ecologi API key here and I can store it safely outside the repo.",
+        "signupUrl": ECOLOGI_SIGNUP_URL,
+        "apiKeyUrl": ECOLOGI_API_KEY_URL,
+        "envVar": CLIMATE_AUTH_ENV_VAR,
+        "configPath": str(config_path.expanduser()),
+    }
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -110,14 +129,17 @@ def main(argv: list[str] | None = None) -> int:
             )
 
         if args.command == "purchase":
+            config_path = Path(args.config_path).expanduser()
             api_key = (
                 args.api_key
                 or os.getenv(CLIMATE_AUTH_ENV_VAR)
-                or read_shell_env_value(Path(args.config_path), CLIMATE_AUTH_ENV_VAR)
+                or read_shell_env_value(config_path, CLIMATE_AUTH_ENV_VAR)
             )
             if not api_key:
-                raise ValidationError(
-                    f"Missing Ecologi credential. Set {CLIMATE_AUTH_ENV_VAR} or pass --api-key."
+                return _print_json(
+                    _setup_required_payload(
+                        config_path=config_path,
+                    )
                 )
 
             preview = args.mode == "preview"

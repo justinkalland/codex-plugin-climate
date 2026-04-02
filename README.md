@@ -64,6 +64,8 @@ The installer stages the plugin into your user Codex directory and wires the use
 
 Once installed, you can invoke the plugin with `@climate`.
 
+If Ecologi is not configured yet, Climate should guide setup first and store the key outside the repo before making purchases.
+
 Examples:
 
 - `Set up Ecologi for this repo using @climate`

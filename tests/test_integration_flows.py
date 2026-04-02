@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import tempfile
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
@@ -34,6 +35,39 @@ class _FakeOpener:
 
 
 class IntegrationFlowTests(unittest.TestCase):
+    def test_missing_key_returns_setup_required_response(self) -> None:
+        stdout = io.StringIO()
+        stderr = io.StringIO()
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with mock.patch.dict(os.environ, {}, clear=True):
+                with redirect_stdout(stdout), redirect_stderr(stderr):
+                    exit_code = cli.main(
+                        [
+                            "purchase",
+                            "--action",
+                            "plant-tree",
+                            "--quantity",
+                            "1",
+                            "--mode",
+                            "preview",
+                            "--repo-root",
+                            temp_dir,
+                            "--config-path",
+                            str(Path(temp_dir) / "config.toml"),
+                        ]
+                    )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(stderr.getvalue(), "")
+            self.assertFalse((Path(temp_dir) / "CLIMATE.md").exists())
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(payload["status"], "setup-required")
+            self.assertEqual(payload["provider"], "ecologi")
+            self.assertTrue(payload["setupRequired"])
+            self.assertEqual(payload["errorCode"], "missing-credential")
+            self.assertIn("Paste your Ecologi API key here", payload["nextStep"])
+
     def test_preview_mode_is_non_mutating(self) -> None:
         fake_opener = _FakeOpener({"amount": 0.6, "currency": "GBP"})
         stdout = io.StringIO()

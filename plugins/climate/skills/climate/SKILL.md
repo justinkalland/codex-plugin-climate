@@ -32,6 +32,8 @@ The current runtime requires Python 3.10 or newer.
 
 ## Setup Flow
 
+If a user tries to plant trees, buy avoidance, or buy removal before Ecologi is configured, do not continue to preview or quote pricing. Route into setup instead.
+
 1. Point the user to Ecologi signup and API key pages:
    - `https://ecologi.com/pay-as-you-go`
    - `https://ecologi.com/impact-api`
@@ -45,6 +47,12 @@ sh plugins/climate/scripts/climate configure-ecologi --read-key-stdin
 4. Do not put the API key in repo files.
 5. Avoid `--api-key` on the command line unless the user explicitly accepts exposing the key in command history.
 6. For local development without network calls, the special credential value `SIMULATE` is valid and should behave like a normal provider run using fixed example USD pricing.
+7. If the user message is just the API key or says it is their key, treat that as permission to store it with `configure-ecologi --read-key-stdin`.
+8. If the helper reports `status: setup-required`, respond sharply and stop there:
+   - tell the user Ecologi is not configured yet
+   - link the signup and API key pages
+   - ask them to paste the key here so you can store it outside the repo
+   - do not estimate pricing, do not run demo quotes, and do not continue the purchase flow
 
 ## Preview Flow
 
@@ -115,6 +123,7 @@ sh plugins/climate/scripts/climate estimate --repo-root .
 
 ## Output Expectations
 
+- If the helper reports `status: setup-required`, do not quote price or continue with the requested purchase. Ask for the Ecologi API key instead.
 - If the helper reports `skipped-unmanaged-existing`, tell the user `CLIMATE.md` already exists and is not managed by Climate, so it was left unchanged.
 - Prefer concise summaries over raw JSON.
 - For preview purchases, use natural action phrasing plus cost, not mechanical tool phrasing.
