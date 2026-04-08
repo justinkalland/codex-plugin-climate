@@ -1,6 +1,8 @@
-# Climate Plugin for Codex
+# Climate 🌎 🌱 - Plugin for Codex
 
 Take climate action from Codex. This plugin lets you make climate purchases through supported providers and track them in your repo with a managed `CLIMATE.md`.
+
+[![Demo video](./assets/docs-demo-video-play.png)](https://cdn.kalland.com/codex-climate-demo.mp4)
 
 V1 (MVP) supports:
 
